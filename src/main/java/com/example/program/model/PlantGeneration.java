@@ -24,8 +24,7 @@ public class PlantGeneration {
     public PlantGeneration() {
     }
 
-    public PlantGeneration(Long id, Long timestamp, String plantId, String sourceKey, double dcPower, double acPower, double dailyYield, double totalYield) {
-        this.id = id;
+    public PlantGeneration(Long timestamp, String plantId, String sourceKey, double dcPower, double acPower, double dailyYield, double totalYield) {
         this.timestamp = timestamp;
         this.plantId = plantId;
         this.sourceKey = sourceKey;
