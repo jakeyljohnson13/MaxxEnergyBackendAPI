@@ -5,11 +5,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 
-
+// @Entity tells Spring Boot this class should be stored in the database as a table
 @Entity
 public class PlantGeneration {
-
+    // @Id marks this field as the primary key (unique ID for the record)
     @Id
+    // @GeneratedValue tells Spring Boot to automatically generate this ID when a new record is created
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

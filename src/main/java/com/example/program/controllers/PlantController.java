@@ -6,9 +6,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
-// @RestController tells Spring this class handles web requests and returns JSON data
+// @RestController marks this class as a controller where every method returns a domain object instead of a view.
+// It's a shortcut for @Controller and @ResponseBody combined.
 @RestController
-// @RequestMapping defines the base URL for all methods in this controller
+// @RequestMapping defines the base URI for all endpoints in this class
+// All methods here will be prefixed with /api/plants
 @RequestMapping("/api/plants")
 public class PlantController {
 
