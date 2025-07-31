@@ -10,4 +10,13 @@ public class Application {
 		SpringApplication.run(Application.class, args);
 	}
 
+
+	/*
+	localhost:8080//api/public/home
+	/about
+	etc(public controller)
+	/api/plants/demo
+	etc
+
+	 */
 }
