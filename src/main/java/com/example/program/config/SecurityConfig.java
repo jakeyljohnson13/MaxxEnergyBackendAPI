@@ -42,8 +42,11 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Allow frontend origin (React dev server)
-        config.setAllowedOrigins(List.of("http://localhost:3000"));
+        config.setAllowedOrigins(List.of(
+                "http://localhost:3000",                  // local React dev server
+                "https://your-frontend.vercel.app",       // deployed frontend (e.g., Vercel)
+                "https://your-backend.onrender.com"       // optional, in case you test from browser directly
+        ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
