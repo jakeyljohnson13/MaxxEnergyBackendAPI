@@ -29,9 +29,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // 1️⃣ Disables CSRF (cross-site request forgery protection)
                 .cors(Customizer.withDefaults()) // Enable CORS with default config
                 .authorizeHttpRequests(auth -> auth // 2️⃣ Configure access rules
-                        .requestMatchers("/public/**").permitAll() // 3️⃣ Allow all public paths
-                        .requestMatchers("/admin/**").hasRole("ADMIN") // 4️⃣ Admin-only section
-                        .requestMatchers("/staff/**").hasAnyRole("STAFF") // 5️⃣ Staff-level access
+                        .requestMatchers("/api/public/**").permitAll() // 3️⃣ Allow all public paths
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // 4️⃣ Admin-only section
+                        .requestMatchers("/api/staff/**").hasAnyRole("STAFF") // 5️⃣ Staff-level access
                         .anyRequest().authenticated() // 6️⃣ All other requests require login
                 );
 
