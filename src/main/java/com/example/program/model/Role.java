@@ -1,7 +1,7 @@
 package com.example.program.model;
 
 public enum Role {
-    USER,
-    ADMIN,
-    STAFF
+    ROLE_USER,
+    ROLE_ADMIN,
+    ROLE_STAFF
 }

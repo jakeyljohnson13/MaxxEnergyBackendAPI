@@ -2,7 +2,10 @@ package com.example.program.controllers;
 
 import com.example.program.model.PlantGeneration;
 import com.example.program.repository.PlantGenerationRepository;
+import com.example.program.service.PlantGenerationService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Optional;
 
 import java.util.*;
 // @RestController marks this class as a controller where every method returns a domain object instead of a view.
@@ -13,40 +16,11 @@ import java.util.*;
 @RequestMapping("/api/plants")
 public class PlantController {
 
-    // @GetMapping makes this method respond to GET requests at /api/plants/demo
-    @GetMapping("/demo")
-    public List<PlantGeneration> getDemoData() {
-        // Create a couple of hardcoded PlantGeneration objects
-        PlantGeneration demo1 = new PlantGeneration(
-                4135001L,
-                "1BY6WEcLGh8j5v7",
-                "SOURCE001",
-                200.5,
-                195.0,
-                875.2,
-                1000000.0
-        );
 
-        PlantGeneration demo2 = new PlantGeneration(
-                4135002L,
-                "3PZuoBAID5Wc2HD",
-                "SOURCE002",
-                180.0,
-                178.5,
-                600.0,
-                950000.0
-        );
+    private final PlantGenerationService service;
 
-        // Return both in a list — Spring Boot will automatically convert this to JSON
-        return List.of(demo1, demo2);
-
-
-    }
-
-    private final PlantGenerationRepository repository;
-
-    public PlantController(PlantGenerationRepository repository) {
-        this.repository = repository;
+    public PlantController(PlantGenerationService service) {
+        this.service = service;
     }
 
 
@@ -57,19 +31,26 @@ public class PlantController {
     Leaving this message here as a reminder to test at a later time.
      ############################################################*/
 
-    
+
 
 
     // Return all records
     @GetMapping
     public List<PlantGeneration> getAllPlantData() {
-        return repository.findAll();
+        return service.getAll();
     }
 
     // Save a new record
     @PostMapping
     public PlantGeneration createPlantData(@RequestBody PlantGeneration newData) {
-        return repository.save(newData);
+        return service.create(newData);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<PlantGeneration> updatePlantData(@PathVariable Long id, @RequestBody PlantGeneration updatedData) {
+        return service.update(id, updatedData)
+                .map(plant -> ResponseEntity.ok(plant))
+                .orElse(ResponseEntity.notFound().build());
     }
 
 }

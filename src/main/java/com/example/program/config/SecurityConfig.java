@@ -30,8 +30,9 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults()) // Enable CORS with default config
                 .authorizeHttpRequests(auth -> auth // 2️⃣ Configure access rules
                         .requestMatchers("/api/public/**").permitAll() // 3️⃣ Allow all public paths
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // 4️⃣ Admin-only section
-                        .requestMatchers("/api/staff/**").hasAnyRole("STAFF") // 5️⃣ Staff-level access
+                        .requestMatchers("/user/**").hasAnyRole("USER", "STAFF", "ADMIN")
+                        .requestMatchers("/api/staff/**").hasAnyRole("STAFF","ADMIN") // 4️⃣ Staff-level access
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // 5️⃣ Admin-only section
                         .anyRequest().authenticated() // 6️⃣ All other requests require login
                 );
 
