@@ -1,9 +1,8 @@
 package com.example.program.controllers;
 
 import com.example.program.model.PlantGeneration;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.example.program.repository.PlantGenerationRepository;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 // @RestController marks this class as a controller where every method returns a domain object instead of a view.
@@ -43,4 +42,34 @@ public class PlantController {
 
 
     }
+
+    private final PlantGenerationRepository repository;
+
+    public PlantController(PlantGenerationRepository repository) {
+        this.repository = repository;
+    }
+
+
+
+
+    /*############################################################
+    Below are some implementations however are untested as of right now.
+    Leaving this message here as a reminder to test at a later time.
+     ############################################################*/
+
+    
+
+
+    // Return all records
+    @GetMapping
+    public List<PlantGeneration> getAllPlantData() {
+        return repository.findAll();
+    }
+
+    // Save a new record
+    @PostMapping
+    public PlantGeneration createPlantData(@RequestBody PlantGeneration newData) {
+        return repository.save(newData);
+    }
+
 }
