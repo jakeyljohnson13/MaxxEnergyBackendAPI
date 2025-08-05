@@ -16,21 +16,19 @@ import java.util.Collections;
 public class CustomUserDetailsService implements UserDetailsService {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserRepository userRepository; // Used to fetch users by username
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository
-                .findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+        // Search for user in the database
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // Convert your enum Role into ROLE_ authority format
-        String role = "ROLE_" + user.getRole().name(); // e.g., ROLE_USER
-
+        // Return Spring Security user object with username, password, and roles
         return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority(role))
+                user.getUsername(), // login identifier
+                user.getPassword(), // hashed password
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
         );
     }
 }
