@@ -65,6 +65,7 @@ public class SecurityConfig {
                 // 🔐 All other endpoints require login/authentication
                 .anyRequest().authenticated()
         );
+        //--------------------------------------------------------------------------------------------------
 
         // 🚪 Configure logout behavior
         http.logout(logout -> logout
@@ -80,6 +81,7 @@ public class SecurityConfig {
                 // 🧼 Deletes session cookie so browser doesn't try to reuse old session
                 .deleteCookies("JSESSIONID")
         );
+        //--------------------------------------------------------------------------------------------------
 
         // 🚨 Define custom behavior when access is denied (e.g., not enough permissions)
         http.exceptionHandling(eh -> eh
@@ -91,10 +93,26 @@ public class SecurityConfig {
                     res.getWriter().write("Access Denied: You do not have permission.");
                 })
         );
+        //--------------------------------------------------------------------------------------------------
+        //--------------------------------------------------------------------------------------------------
+        //--------------------------------------------------------------------------------------------------
+        // CHANGE THIS LATER AFTER TESTING LOGIN WORKS AS IT IS NOT SECURE SWAP TO A JWT FILTER
+          http.formLogin(form -> form
+                .loginPage("/login")             // You can use Spring's default page
+                .permitAll()
+        );
+        //--------------------------------------------------------------------------------------------------
+        //--------------------------------------------------------------------------------------------------
+        //--------------------------------------------------------------------------------------------------
+        //--------------------------------------------------------------------------------------------------
 
         // ✅ Build and return the configured HttpSecurity object as a filter chain
         return http.build();
     }
+
+    //--------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------------------
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
