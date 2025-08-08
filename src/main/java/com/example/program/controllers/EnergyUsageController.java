@@ -27,11 +27,17 @@ public class EnergyUsageController {
             hourly.put(times[i], values[i]);
         }
 
-        EnergyUsageRecord record = new EnergyUsageRecord(
-                "1300000001", "R", "SUBST402", "W", "TRNSF135",
-                "23227", LocalDate.of(2024, 1, 1), hourly
-        );
 
+        EnergyUsageRecord record = EnergyUsageRecord.builder()
+                .accountNo("1300000001")
+                .type("R")
+                .substation("SUBST402")
+                .season("W")
+                .transformer("TRNSF135")
+                .zipCode("23227")
+                .date(LocalDate.of(2024, 1, 1))
+                .hourlyUsage(hourly)
+                .build();
         return List.of(record);
     }
 }
