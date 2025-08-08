@@ -43,13 +43,17 @@ public class SecurityConfig {
         // ⚙️ Manage how sessions are handled in the app
         http.sessionManagement(session -> session
                 // 🧾 Stateless means Spring Security won't use sessions to store user state
+                //If required is the default so could be emmited if i want to
                 // Ideal for APIs using tokens like JWT instead of session cookies
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
         );
         //--------------------------------------------------------------------------------------------------
 
         // ✅ Define access rules for different routes based on user roles
         http.authorizeHttpRequests(auth -> auth
+                // Allow the login/signup pages and static assets
+                .requestMatchers("/login", "/auth/register")
+                .permitAll()
                 // 🟢 Public APIs - no login required
                 .requestMatchers("/api/public/**").permitAll()
 
@@ -80,6 +84,7 @@ public class SecurityConfig {
 
                 // 🧼 Deletes session cookie so browser doesn't try to reuse old session
                 .deleteCookies("JSESSIONID")
+                .permitAll()
         );
         //--------------------------------------------------------------------------------------------------
 
@@ -97,9 +102,14 @@ public class SecurityConfig {
         //--------------------------------------------------------------------------------------------------
         //--------------------------------------------------------------------------------------------------
         // CHANGE THIS LATER AFTER TESTING LOGIN WORKS AS IT IS NOT SECURE SWAP TO A JWT FILTER
-          http.formLogin(form -> form
-                .loginPage("/login")             // You can use Spring's default page
+        // Use Spring’s default generated login page for testing
+            http.formLogin(form -> form
+                //.loginPage("/login")               // for when i have an actual login view. for now not needed. gonna use defualt
                 .permitAll()
+                // Optional: where to land after successful login
+                .defaultSuccessUrl("/user/dashboard", true)
+                // Optional: where to go if login fails
+                .failureUrl("/login?error")
         );
         //--------------------------------------------------------------------------------------------------
         //--------------------------------------------------------------------------------------------------
@@ -122,6 +132,7 @@ public class SecurityConfig {
                 "http://localhost:3000",                  // local React dev server
                 "https://your-frontend.vercel.app",       // deployed frontend (e.g., Vercel)
                 "https://your-backend.onrender.com"       // optional, in case you test from browser directly
+                //these are ai examples for the urls. will change when we  actually test that
         ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
