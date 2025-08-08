@@ -20,6 +20,8 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder; // Securely hashes the password
 
+
+
     @PostMapping("/register")
     public String registerUser(@RequestBody User user) {
         // Check if username already exists

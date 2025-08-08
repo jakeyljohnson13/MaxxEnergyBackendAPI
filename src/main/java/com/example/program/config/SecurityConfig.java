@@ -3,6 +3,7 @@ package com.example.program.config;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -32,8 +33,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // 🔒 CSRF (Cross-Site Request Forgery) protection is disabled here
         // In REST APIs (especially token-based ones like JWT), CSRF isn't typically needed
-        // Enable only if you're using form-based login (e.g., with Thymeleaf UI)
-        http.csrf(csrf -> csrf.disable());// Disables CSRF (cross-site request forgery protection)
+        http.csrf(csrf -> csrf
+                .ignoringRequestMatchers("/auth/register") // Skip CSRF check for this endpoint
+        );
         //--------------------------------------------------------------------------------------------------
         // 🌍 Enable Cross-Origin Resource Sharing (CORS)
         // Allows your frontend (on a different domain/port) to make requests to this backend
@@ -56,6 +58,8 @@ public class SecurityConfig {
                 .permitAll()
                 // 🟢 Public APIs - no login required
                 .requestMatchers("/api/public/**").permitAll()
+                // Allow the POST for register
+                .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
 
                 // 🟡 Logged-in users with any of these roles can access /user/** endpoints
                 .requestMatchers("/user/**").hasAnyRole("USER", "STAFF", "ADMIN")
