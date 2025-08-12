@@ -1,12 +1,15 @@
 package com.example.program.model;
 
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Entity
-@Table
+@Table(name = "energy_usage_record")
 public class EnergyUsageRecord {
 
     @Id
@@ -22,10 +25,12 @@ public class EnergyUsageRecord {
     private LocalDate date;
 
     @ElementCollection
-    @CollectionTable(name = "energy_usage_hours", joinColumns = @JoinColumn(name = "record_id"))
-    @MapKeyColumn(name = "time_hhmm")
-    @Column(name = "usage_kw")
-    private Map<String, Double> hourlyUsage = new LinkedHashMap<>();
+    @CollectionTable(
+            name = "energy_usage_hours",
+            joinColumns = @JoinColumn(name = "record_id"))
+    @MapKeyColumn(name = "`timestamp`")
+    @Column(name = "kwh, nullable = false")
+    private Map<LocalDateTime, BigDecimal> hourlyUsage = new LinkedHashMap<>();
 
     // ----- JPA requires a no-args constructor -----
     protected EnergyUsageRecord() {}
@@ -33,7 +38,7 @@ public class EnergyUsageRecord {
     // ----- Optional all-args constructor -----
     public EnergyUsageRecord(Long id, String accountNo, String type, String substation,
                              String season, String transformer, String zipCode,
-                             LocalDate date, Map<String, Double> hourlyUsage) {
+                             LocalDate date, Map<LocalDateTime, BigDecimal> hourlyUsage) {
         this.id = id;
         this.accountNo = accountNo;
         this.type = type;
@@ -51,7 +56,7 @@ public class EnergyUsageRecord {
         private Long id;
         private String accountNo, type, substation, season, transformer, zipCode;
         private LocalDate date;
-        private Map<String, Double> hourlyUsage = new LinkedHashMap<>();
+        private Map<LocalDateTime, BigDecimal> hourlyUsage = new LinkedHashMap<>();
 
         public Builder id(Long v){ this.id=v; return this; }
         public Builder accountNo(String v){ this.accountNo=v; return this; }
@@ -61,7 +66,7 @@ public class EnergyUsageRecord {
         public Builder transformer(String v){ this.transformer=v; return this; }
         public Builder zipCode(String v){ this.zipCode=v; return this; }
         public Builder date(LocalDate v){ this.date=v; return this; }
-        public Builder hourlyUsage(Map<String, Double> v){ this.hourlyUsage=v; return this; }
+        public Builder hourlyUsage(Map<LocalDateTime, BigDecimal> v){ this.hourlyUsage=v; return this; }
 
         public EnergyUsageRecord build() {
             return new EnergyUsageRecord(id, accountNo, type, substation, season,
@@ -87,6 +92,9 @@ public class EnergyUsageRecord {
     public void setZipCode(String zipCode) { this.zipCode = zipCode; }
     public LocalDate getDate() { return date; }
     public void setDate(LocalDate date) { this.date = date; }
-    public Map<String, Double> getHourlyUsage() { return hourlyUsage; }
-    public void setHourlyUsage(Map<String, Double> hourlyUsage) { this.hourlyUsage = hourlyUsage; }
+    public Map<LocalDateTime, BigDecimal> getHourlyUsage() {
+        return hourlyUsage;
+    }
+    public void setHourlyUsage(Map<LocalDateTime, BigDecimal> hourlyUsage) {
+        this.hourlyUsage = hourlyUsage; }
 }

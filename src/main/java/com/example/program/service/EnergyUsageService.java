@@ -7,7 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -32,32 +34,35 @@ public class EnergyUsageService {
     public List<EnergyUsageRecord> byDate(LocalDate date) { return repo.findByDate(date); }
     public List<EnergyUsageRecord> byRange(LocalDate start, LocalDate end) { return repo.findByDateBetween(start, end); }
 
-    public double dailyTotal(EnergyUsageRecord r) {
-        return r.getHourlyUsage() == null ? 0.0
-                : r.getHourlyUsage().values().stream().mapToDouble(Double::doubleValue).sum();
+    public BigDecimal dailyTotal(EnergyUsageRecord r) {
+        if (r.getHourlyUsage() == null || r.getHourlyUsage().isEmpty()) return BigDecimal.ZERO;
+        return r.getHourlyUsage().values().stream()
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public String peakHour(EnergyUsageRecord r) {
+    // hour with max kWh
+    public LocalDateTime peakHour(EnergyUsageRecord r) {
         if (r.getHourlyUsage() == null || r.getHourlyUsage().isEmpty()) return null;
         return r.getHourlyUsage().entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .map(Map.Entry::getKey).orElse(null);
+                .max(Map.Entry.comparingByValue())      // compares BigDecimal
+                .map(Map.Entry::getKey)                  // returns LocalDateTime
+                .orElse(null);
     }
 
-    public Map<String, Double> totalBySubstation(LocalDate date) {
-        Map<String, Double> totals = new HashMap<>();
-        for (EnergyUsageRecord r : byDate(date)) {
-            String key = r.getSubstation();
-            totals.merge(key, dailyTotal(r), Double::sum);
+    // totals by substation for a date
+    public Map<String, BigDecimal> totalBySubstation(LocalDate date) {
+        Map<String, BigDecimal> totals = new HashMap<>();
+        for (EnergyUsageRecord r : byDate(date)) {      // your own fetch method
+            totals.merge(r.getSubstation(), dailyTotal(r), BigDecimal::add);
         }
         return totals;
     }
 
-    public Map<String, Double> systemLoadCurve(LocalDate date) {
-        Map<String, Double> curve = new TreeMap<>(); // sorted by time key
+    public Map<LocalDateTime, BigDecimal> systemLoadCurve(LocalDate date) {
+        Map<LocalDateTime, BigDecimal> curve = new TreeMap<>(); // LocalDateTime is Comparable
         for (EnergyUsageRecord r : byDate(date)) {
             if (r.getHourlyUsage() == null) continue;
-            r.getHourlyUsage().forEach((t, v) -> curve.merge(t, v, Double::sum));
+            r.getHourlyUsage().forEach((t, v) -> curve.merge(t, v, BigDecimal::add));
         }
         return curve;
     }
