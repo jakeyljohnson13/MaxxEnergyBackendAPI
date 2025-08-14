@@ -33,6 +33,8 @@ public class AppStartupConfig {
                 userRepository.save(staff);
                 System.out.println("✔ Staff created.");
             }
+
+
         };
     }
 }
