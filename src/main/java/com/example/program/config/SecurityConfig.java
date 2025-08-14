@@ -34,7 +34,7 @@ public class SecurityConfig {
         // 🔒 CSRF (Cross-Site Request Forgery) protection is disabled here
         // In REST APIs (especially token-based ones like JWT), CSRF isn't typically needed
         http.csrf(csrf -> csrf
-                .ignoringRequestMatchers("/auth/register") // Skip CSRF check for this endpoint
+                .ignoringRequestMatchers("/auth/**") // Skip CSRF check for this endpoint
         );
         //--------------------------------------------------------------------------------------------------
         // 🌍 Enable Cross-Origin Resource Sharing (CORS)
