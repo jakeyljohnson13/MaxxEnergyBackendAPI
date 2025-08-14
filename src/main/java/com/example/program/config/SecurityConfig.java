@@ -1,5 +1,6 @@
 package com.example.program.config;
 
+import com.example.program.security.Matchers;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,7 +35,7 @@ public class SecurityConfig {
         // 🔒 CSRF (Cross-Site Request Forgery) protection is disabled here
         // In REST APIs (especially token-based ones like JWT), CSRF isn't typically needed
         http.csrf(csrf -> csrf
-                .ignoringRequestMatchers("/auth/**") // Skip CSRF check for this endpoint
+                .ignoringRequestMatchers(Matchers.post("/auth/register")) // Skip CSRF check for this endpoint
         );
         //--------------------------------------------------------------------------------------------------
         // 🌍 Enable Cross-Origin Resource Sharing (CORS)
@@ -53,24 +54,21 @@ public class SecurityConfig {
 
         // ✅ Define access rules for different routes based on user roles
         http.authorizeHttpRequests(auth -> auth
-                // Allow the login/signup pages and static assets
-                .requestMatchers("/login", "/auth/register")
-                .permitAll()
-                // 🟢 Public APIs - no login required
+                // Permit the login page itself (GET /login)
+                .requestMatchers(Matchers.get("/login")).permitAll()
+
+                // Allow registering a new user (POST /auth/register)
+                .requestMatchers(Matchers.post("/auth/register")).permitAll()
+
+                // Public API (keep using your existing prefix rule if you want — see note below)
+                // If you want exact paths only, add them one by one with Matchers.get("/api/public/home") etc.
                 .requestMatchers("/api/public/**").permitAll()
-                // Allow the POST for register
-                .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
 
-                // 🟡 Logged-in users with any of these roles can access /user/** endpoints
-                .requestMatchers("/user/**").hasAnyRole("USER", "STAFF", "ADMIN")
-
-                // 🔵 Only STAFF and ADMIN can access /staff/** endpoints
-                .requestMatchers("/staff/**").hasAnyRole("STAFF", "ADMIN")
-
-                // 🔴 Only ADMINs can access /admin/** endpoints
+                // Role-guarded areas
+                .requestMatchers("/user/**").hasAnyRole("USER","STAFF","ADMIN")
+                .requestMatchers("/staff/**").hasAnyRole("STAFF","ADMIN")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                // 🔐 All other endpoints require login/authentication
                 .anyRequest().authenticated()
         );
         //--------------------------------------------------------------------------------------------------
