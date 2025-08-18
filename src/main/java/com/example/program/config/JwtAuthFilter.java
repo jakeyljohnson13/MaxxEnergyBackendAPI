@@ -31,52 +31,24 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
-        String header = req.getHeader("Authorization");
-
-        // Only handle Bearer tokens; otherwise continue the chain
-        if (header == null || !header.startsWith("Bearer ")) {
+        String h = req.getHeader("Authorization");
+        if (h == null || !h.startsWith("Bearer ")) {
+            // No token => do NOT fail; let permitAll rules apply
             chain.doFilter(req, res);
             return;
         }
 
-        String token = header.substring(7); // chop off "Bearer "
-
         try {
-            // 1) pull identity & role from the token
-            String username = jwt.extractUsername(token);     // subject set in generate(...)
-            Role role = jwt.extractRole(token);               // claim "role" -> enum
-
-            // 2) avoid overriding an existing auth (another filter or form-login)
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-                // (optional but recommended) re-hydrate user to ensure still valid/enabled
-                Optional<User> maybeUser = users.findByUsername(username);
-                if (maybeUser.isPresent()) {
-                    // turn enum into "ROLE_X" authority
-                    var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
-
-                    var auth = new UsernamePasswordAuthenticationToken(
-                            username,       // principal (you could also use the User entity)
-                            null,           // credentials (don’t put passwords here)
-                            authorities
-                    );
-                    auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
-
-                    SecurityContextHolder.getContext().setAuthentication(auth);
-                }
-            }
-
-        } catch (ExpiredJwtException e) {
-            // token known, but expired
-            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            res.getWriter().write("Token expired");
-            return; // stop further processing
-        } catch (JwtException e) {
-            // malformed / signature invalid / etc. -> just continue unauthenticated
-            // (alternatively, send 401 if you prefer hard-fail)
+            var claims = jwt.parse(h.substring(7)).getBody();
+            String username = claims.getSubject();
+            String roleStr  = claims.get("role", String.class); // if you store the enum name
+            var auth = new UsernamePasswordAuthenticationToken(
+                    username, null, List.of(new SimpleGrantedAuthority("ROLE_" + roleStr))
+            );
+            SecurityContextHolder.getContext().setAuthentication(auth);
+        } catch (Exception ignored) {
+            // Token bad? Don’t nuke open endpoints—just continue.
         }
-
-        // Continue down the filter chain
         chain.doFilter(req, res);
     }
 }
