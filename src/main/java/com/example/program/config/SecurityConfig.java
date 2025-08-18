@@ -91,7 +91,7 @@ public class SecurityConfig {
 
                 // Allow registering and logging in a user (POST /auth/register and /auth/login)
                 .requestMatchers("/api/auth/**").permitAll()
-
+                .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                 .requestMatchers("/api/public/**").permitAll()
 
                 // Role-guarded areas
@@ -102,6 +102,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().authenticated()
         );
+        http
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable);
         //--------------------------------------------------------------------------------------------------
 
          // return 401/403 as JSON/errors (no redirects)
