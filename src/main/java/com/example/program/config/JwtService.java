@@ -28,7 +28,7 @@ public class JwtService {
     public String generate(String username, Role role) {
         return Jwts.builder()
                 .setSubject(username)
-                .claim("role", role)
+                .claim("role", role.name())
                 .setExpiration(new Date(System.currentTimeMillis() + expMs))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
