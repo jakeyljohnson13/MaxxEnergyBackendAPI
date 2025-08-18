@@ -14,6 +14,10 @@ public class AppStartupConfig {
     @Bean
     public CommandLineRunner createInitialUsers(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
+
+            // Examples don't actually add as they are unsecure. used for testing and removed from database already
+
+            /*
             if (userRepository.findByEmail("admin@example.com").isEmpty()) {
                 User admin = new User();
                 admin.setUsername("admin");
@@ -33,7 +37,7 @@ public class AppStartupConfig {
                 userRepository.save(staff);
                 System.out.println("✔ Staff created.");
             }
-
+*/
 
         };
     }

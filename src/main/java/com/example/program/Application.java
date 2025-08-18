@@ -11,14 +11,6 @@ public class Application {
 	}
 
 
-	/*
-	localhost:8080//api/public/home
-	/about
-	etc(public controller)
-	/api/plants/demo
-	etc
-
-	 */
 
 
 
