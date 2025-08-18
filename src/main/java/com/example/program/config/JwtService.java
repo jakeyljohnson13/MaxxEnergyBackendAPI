@@ -37,4 +37,16 @@ public class JwtService {
     public Jws<Claims> parse(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
     }
+
+    public Role extractRole(String token) {
+        Claims claims = parse(token).getBody();
+        String roleStr = claims.get("role", String.class);
+        return Role.valueOf(roleStr); // converts "ADMIN" -> Role.ADMIN
+    }
+
+    public String extractUsername(String token) {
+        return parse(token).getBody().getSubject();
+    }
+
+
 }
