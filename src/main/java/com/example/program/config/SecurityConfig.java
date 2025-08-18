@@ -1,10 +1,13 @@
 package com.example.program.config;
 
-import com.example.program.security.Matchers;
+
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,6 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -27,6 +31,40 @@ so i can test the endpoint i setup with the few example data pieces
 // @Configuration tells Spring Boot this is a setup class for custom settings
 @Configuration
 public class SecurityConfig {
+    // read from application.properties: app.cors.allowed-origin=http://localhost:5173
+    @Value("${app.cors.allowed-origin:http://localhost:5173}")
+    private String allowedOrigin;
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    AuthenticationManager authManager(AuthenticationConfiguration c) throws Exception {
+        return c.getAuthenticationManager();
+    }
+
+    private final CorsConfigurationSource corsSource;
+    private final JwtAuthFilter jwtFilter; // your JWT filter bean
+
+    public SecurityConfig(CorsConfigurationSource corsSource, JwtAuthFilter jwtFilter) {
+        this.corsSource = corsSource;
+        this.jwtFilter = jwtFilter;
+    }
+
+    private CorsConfigurationSource corsSource() {
+        CorsConfiguration cfg = new CorsConfiguration();
+        cfg.setAllowedOrigins(List.of(allowedOrigin));
+        cfg.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
+        cfg.setAllowedHeaders(List.of("Authorization","Content-Type","Accept","X-Requested-With","Origin"));
+        cfg.setExposedHeaders(List.of("Authorization")); // optional, useful if you ever return tokens in headers
+        cfg.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
+        src.registerCorsConfiguration("/**", cfg);
+        return src;
+    }
 
     // Define custom security rules using Spring's DSL (Domain Specific Language)
     // Declares a Spring-managed bean to configure the security filter chain
@@ -34,123 +72,59 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // 🔒 CSRF (Cross-Site Request Forgery) protection is disabled here
         // In REST APIs (especially token-based ones like JWT), CSRF isn't typically needed
-        http.csrf(csrf -> csrf
-                .ignoringRequestMatchers(Matchers.post("/auth/register")) // Skip CSRF check for this endpoint
-        );
+       http.csrf(csrf -> csrf.disable());
         //--------------------------------------------------------------------------------------------------
         // 🌍 Enable Cross-Origin Resource Sharing (CORS)
         // Allows your frontend (on a different domain/port) to make requests to this backend
         // Customizer.withDefaults() applies Spring Boot's default CORS config
-        http.cors(Customizer.withDefaults()); // Enable CORS with default config
+        http.cors(cors -> cors.configurationSource(corsSource())); // Enable CORS with default config
         //--------------------------------------------------------------------------------------------------
         // ⚙️ Manage how sessions are handled in the app
-        http.sessionManagement(session -> session
-                // 🧾 Stateless means Spring Security won't use sessions to store user state
-                //If required is the default so could be emmited if i want to
-                // Ideal for APIs using tokens like JWT instead of session cookies
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-        );
+        http.sessionManagement(sm ->
+                sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         //--------------------------------------------------------------------------------------------------
 
         // ✅ Define access rules for different routes based on user roles
         http.authorizeHttpRequests(auth -> auth
                 // Permit the login page itself (GET /login)
-                .requestMatchers(Matchers.get("/login")).permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // Allow registering a new user (POST /auth/register)
-                .requestMatchers(Matchers.post("/auth/register")).permitAll()
+                // Allow registering and logging in a user (POST /auth/register and /auth/login)
+                .requestMatchers("/api/auth/**").permitAll()
 
-                // Public API (keep using your existing prefix rule if you want — see note below)
-                // If you want exact paths only, add them one by one with Matchers.get("/api/public/home") etc.
                 .requestMatchers("/api/public/**").permitAll()
 
                 // Role-guarded areas
                 .requestMatchers("/user/**").hasAnyRole("USER","STAFF","ADMIN")
                 .requestMatchers("/staff/**").hasAnyRole("STAFF","ADMIN")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-
+                // default for the rest of the API
+                .requestMatchers("/api/**").authenticated()
                 .anyRequest().authenticated()
         );
         //--------------------------------------------------------------------------------------------------
 
-        // 🚪 Configure logout behavior
-        http.logout(logout -> logout
-                // 🔗 The endpoint that triggers logout (must be called via POST unless CSRF disabled)
-                .logoutUrl("/logout")
-
-                // ✅ Where the user should be redirected after successful logout
-                .logoutSuccessUrl("/auth/logout-success")
-
-                // 💣 Invalidate session data (mostly redundant for stateless but good practice)
-                .invalidateHttpSession(true)
-
-                // 🧼 Deletes session cookie so browser doesn't try to reuse old session
-                .deleteCookies("JSESSIONID")
-                .permitAll()
-        );
-        //--------------------------------------------------------------------------------------------------
-
-        // 🚨 Define custom behavior when access is denied (e.g., not enough permissions)
-        http.exceptionHandling(eh -> eh
+         // return 401/403 as JSON/errors (no redirects)
+        http.exceptionHandling(e -> e
+                .authenticationEntryPoint((req, res, ex) -> {
+                    res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    res.getWriter().write("Unauthorized");
+                })
                 .accessDeniedHandler((req, res, ex) -> {
-                    // 🔒 Return 403 Forbidden if user doesn't have the correct role
                     res.setStatus(HttpServletResponse.SC_FORBIDDEN);
-
-                    // 📝 Respond with a clear error message
-                    res.getWriter().write("Access Denied: You do not have permission.");
+                    res.getWriter().write("Forbidden");
                 })
         );
-        //--------------------------------------------------------------------------------------------------
-        //--------------------------------------------------------------------------------------------------
-        //--------------------------------------------------------------------------------------------------
-        // CHANGE THIS LATER AFTER TESTING LOGIN WORKS AS IT IS NOT SECURE SWAP TO A JWT FILTER
-        // Use Spring’s default generated login page for testing
-            http.formLogin(form -> form
-                //.loginPage("/login")               // for when i have an actual login view. for now not needed. gonna use defualt
-                .permitAll()
-                // Optional: where to land after successful login
-                .defaultSuccessUrl("/user/dashboard", true)
-                // Optional: where to go if login fails
-                .failureUrl("/login?error")
-        );
-        //--------------------------------------------------------------------------------------------------
-        //--------------------------------------------------------------------------------------------------
-        //--------------------------------------------------------------------------------------------------
-        //--------------------------------------------------------------------------------------------------
+
+// put your JWT filter before username/password auth
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         // ✅ Build and return the configured HttpSecurity object as a filter chain
         return http.build();
     }
 
     //--------------------------------------------------------------------------------------------------
-    //--------------------------------------------------------------------------------------------------
 
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-
-        config.setAllowedOrigins(List.of(
-                "http://localhost:3000",                  // local React dev server
-                "https://your-frontend.vercel.app",       // deployed frontend (e.g., Vercel)
-                "https://your-backend.onrender.com"       // optional, in case you test from browser directly
-                //these are ai examples for the urls. will change when we  actually test that
-        ));
-
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        config.setAllowCredentials(true); // Important for cookies/token headers if needed
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-
-        return source;
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 
 
 }

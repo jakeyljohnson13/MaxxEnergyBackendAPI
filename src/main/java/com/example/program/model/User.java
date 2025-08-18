@@ -1,6 +1,6 @@
 package com.example.program.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -18,10 +18,11 @@ public class User {
     private Long id;
 
 
+    @Column(nullable=false, unique=true)
     private String username;
 
-    @JsonIgnore
-    @Column(nullable=false, length = 60)
+
+    @Column(nullable=false)
     private String password;
 
     @Enumerated(EnumType.STRING)

@@ -11,6 +11,12 @@ import java.util.Map;
 public class PublicController {
 
 
+    /*
+    work with Ruth and Jakari to make tables in the data base that may be relevant to the method/endpoint
+    baseurl+endpoint
+    localhost8080/api/public/home -- for example
+     */
+
     @GetMapping("/home")
     public Map<String, Object> getHomepageData() {
         return Map.of(
