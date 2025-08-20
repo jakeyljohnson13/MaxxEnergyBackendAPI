@@ -1,27 +1,28 @@
-# ---- Build stage ----
-FROM maven:3.9.9-eclipse-temurin-21 AS build
+# ---------- Build stage ----------
+FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
 
-# Copy only pom.xml first (to cache dependencies)
+# Copy Maven wrapper + pom first (so deps cache)
+COPY mvnw ./
+COPY .mvn .mvn
 COPY pom.xml ./
-RUN mvn -q -DskipTests dependency:go-offline
 
-# Copy source
+# Ensure wrapper is executable and prefetch deps
+RUN chmod +x mvnw && ./mvnw -q -DskipTests dependency:go-offline
+
+# Copy source and build
 COPY src ./src
+RUN ./mvnw -q -DskipTests package
 
-# Build the app
-RUN mvn -q -DskipTests package
-
-# ---- Run stage ----
+# ---------- Run stage ----------
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 
-# Copy jar from build stage
+# Copy the fat jar produced by Spring Boot
 COPY --from=build /app/target/*.jar app.jar
 
-# Render will assign a port
+# Render provides PORT; Spring uses server.port=${PORT:8080}
 ENV PORT=8080
 EXPOSE 8080
 
-# Run the app
-CMD ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java","-jar","/app/app.jar"]
