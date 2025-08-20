@@ -1,5 +1,5 @@
 # Stage 1: Build the app
-FROM maven:3.9.5-eclipse-temurin-24 AS build
+FROM maven:3.9.5-eclipse-temurin-17 AS build
 WORKDIR /app
 COPY . .
 RUN mvn clean package -DskipTests
