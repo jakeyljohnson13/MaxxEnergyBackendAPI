@@ -19,10 +19,10 @@ public class JwtService {
             @Value("${app.jwt.secret}") String secret,
             @Value("${app.jwt.exp-min}") long expMin) {
 
-        System.out.println("🔧 Constructor: secret=" + secret);
-        System.out.println("🔧 Constructor: expMin=" + expMin);
-        System.out.println("🔧 ENV JWT_SECRET=" + System.getenv("JWT_SECRET"));
-        System.out.println("🔧 ENV JWT_EXP_MIN=" + System.getenv("JWT_EXP_MIN"));
+//        System.out.println("🔧 Constructor: secret=" + secret);
+//        System.out.println("🔧 Constructor: expMin=" + expMin);
+//        System.out.println("🔧 ENV JWT_SECRET=" + System.getenv("JWT_SECRET"));
+//        System.out.println("🔧 ENV JWT_EXP_MIN=" + System.getenv("JWT_EXP_MIN"));
 
 
         if (secret == null || secret.length() < 32) {
@@ -31,11 +31,11 @@ public class JwtService {
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
         this.expMs = expMin * 60_000;
     }
-    @PostConstruct
-    public void init() {
-        System.out.println("JWT_SECRET: " + System.getenv("JWT_SECRET"));
-        System.out.println("JWT_EXP_MIN: " + System.getenv("JWT_EXP_MIN"));
-    }
+//    @PostConstruct
+//    public void init() {
+//        System.out.println("JWT_SECRET: " + System.getenv("JWT_SECRET"));
+//        System.out.println("JWT_EXP_MIN: " + System.getenv("JWT_EXP_MIN"));
+//    }
 
 
     public String generate(String username, Role role) {
