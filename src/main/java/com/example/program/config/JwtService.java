@@ -3,6 +3,7 @@ package com.example.program.config;
 import com.example.program.model.Role;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.security.Key;
@@ -24,6 +25,12 @@ public class JwtService {
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
         this.expMs = expMin * 60_000;
     }
+    @PostConstruct
+    public void init() {
+        System.out.println("JWT_SECRET: " + System.getenv("JWT_SECRET"));
+        System.out.println("JWT_EXP_MIN: " + System.getenv("JWT_EXP_MIN"));
+    }
+
 
     public String generate(String username, Role role) {
         return Jwts.builder()
