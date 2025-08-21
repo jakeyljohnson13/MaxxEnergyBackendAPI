@@ -19,6 +19,12 @@ public class JwtService {
             @Value("${app.jwt.secret}") String secret,
             @Value("${app.jwt.exp-min}") long expMin) {
 
+        System.out.println("🔧 Constructor: secret=" + secret);
+        System.out.println("🔧 Constructor: expMin=" + expMin);
+        System.out.println("🔧 ENV JWT_SECRET=" + System.getenv("JWT_SECRET"));
+        System.out.println("🔧 ENV JWT_EXP_MIN=" + System.getenv("JWT_EXP_MIN"));
+
+
         if (secret == null || secret.length() < 32) {
             throw new IllegalStateException("app.jwt.secret must be at least 32 characters");
         }
