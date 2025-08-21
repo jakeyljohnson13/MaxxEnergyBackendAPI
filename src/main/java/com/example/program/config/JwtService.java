@@ -10,7 +10,7 @@ import java.security.Key;
 import java.util.Date;
 
 
-//@Service
+@Service
 public class JwtService {
     private final Key key;
     private final long expMs;
