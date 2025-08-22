@@ -45,7 +45,7 @@ build/
 *.log
 
 # Hide secrets
-src/main/resources/application.properties
+
 .env
 
 # Hide Mac and Windows OS junk
