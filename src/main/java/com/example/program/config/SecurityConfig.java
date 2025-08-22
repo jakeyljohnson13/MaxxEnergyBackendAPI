@@ -75,6 +75,9 @@ public class SecurityConfig {
                         // Preflight
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
+                        // Root Path
+                        .requestMatchers("/").permitAll()
+
                         // Auth endpoints
                         .requestMatchers("/api/auth/**").permitAll()
 
