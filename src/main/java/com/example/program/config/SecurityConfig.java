@@ -45,7 +45,12 @@ public class SecurityConfig {
 
     public SecurityConfig(JwtAuthFilter jwtFilter) {
         this.jwtFilter = jwtFilter;
-        this.allowedOrigins = List.of(allowedOriginsRaw.split(","));
+
+        if (allowedOriginsRaw == null || allowedOriginsRaw.isBlank()) {
+            allowedOrigins = List.of("https://maxxenergy-vite-react.vercel.app");
+        } else {
+            allowedOrigins = List.of(allowedOriginsRaw.split(","));
+        }
         System.out.println("Allowed CORS origins: " + allowedOrigins);
     }
 
