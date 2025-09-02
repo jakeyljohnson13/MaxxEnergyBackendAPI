@@ -37,7 +37,7 @@ import java.util.List;
 public class SecurityConfig {
 
     // You can comma-separate multiple origins in application.properties
-    @Value("${app.cors.allowed-origins=https://maxxenergy-vite-react.vercel.app")
+    @Value("${app.cors.allowed-origins=https://maxxenergy-vite-react.vercel.app}")
     private List<String> allowedOrigins;
 
     private final JwtAuthFilter jwtFilter;
