@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import static com.example.program.model.Role.USER;
 
+@CrossOrigin(origins = "https://maxxenergy-vite-react.vercel.app")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
