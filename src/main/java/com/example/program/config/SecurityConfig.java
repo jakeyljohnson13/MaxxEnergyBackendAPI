@@ -38,12 +38,14 @@ public class SecurityConfig {
 
     // You can comma-separate multiple origins in application.properties
     @Value("${app.cors.allowed-origins=https://maxxenergy-vite-react.vercel.app}")
+    private String allowedOriginsRaw;
     private List<String> allowedOrigins;
 
     private final JwtAuthFilter jwtFilter;
 
     public SecurityConfig(JwtAuthFilter jwtFilter) {
         this.jwtFilter = jwtFilter;
+        this.allowedOrigins = List.of(allowedOriginsRaw.split(","));
         System.out.println("Allowed CORS origins: " + allowedOrigins);
     }
 
