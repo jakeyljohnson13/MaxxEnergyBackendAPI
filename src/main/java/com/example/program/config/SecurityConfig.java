@@ -1,5 +1,6 @@
 package com.example.program.config;
 
+import jakarta.servlet.Filter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -18,19 +19,32 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
+
+import java.io.IOException;
+
+
 import java.util.List;
 
 @Configuration
 public class SecurityConfig {
 
     // You can comma-separate multiple origins in application.properties
-    @Value("${app.cors.allowed-origins:http://localhost:5173}")
+    @Value("${app.cors.allowed-origins=https://maxxenergy-vite-react.vercel.app/")
     private List<String> allowedOrigins;
 
     private final JwtAuthFilter jwtFilter;
 
     public SecurityConfig(JwtAuthFilter jwtFilter) {
         this.jwtFilter = jwtFilter;
+        System.out.println("Allowed CORS origins: " + allowedOrigins);
     }
 
     @Bean
@@ -112,5 +126,19 @@ public class SecurityConfig {
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+    @Bean
+    public FilterRegistrationBean<Filter> corsDebugFilter() {
+        FilterRegistrationBean<Filter> bean = new FilterRegistrationBean<>();
+        bean.setFilter((request, response, chain) -> {
+            HttpServletResponse res = (HttpServletResponse) response;
+            res.setHeader("Access-Control-Allow-Origin", "*"); // For debugging only
+            res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+            chain.doFilter(request, response);
+        });
+        bean.addUrlPatterns("/*");
+        bean.setOrder(0);
+        return bean;
     }
 }
