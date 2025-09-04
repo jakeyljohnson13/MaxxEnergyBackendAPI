@@ -28,8 +28,8 @@ public class EnergyUsageRecord {
     @CollectionTable(
             name = "energy_usage_hours",
             joinColumns = @JoinColumn(name = "record_id"))
-    @MapKeyColumn(name = "`timestamp`")
-    @Column(name = "kwh, nullable = false")
+    @MapKeyColumn(name = "timestamp")
+    @Column(name = "kwh", nullable = false)
     private Map<LocalDateTime, BigDecimal> hourlyUsage = new LinkedHashMap<>();
 
     // ----- JPA requires a no-args constructor -----

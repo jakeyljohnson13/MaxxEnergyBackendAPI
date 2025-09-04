@@ -35,6 +35,11 @@ public class PublicController {
     "values", List.of("sustainabilty", "innovation", "etc"),
     "imageurl", "/assets/images/image1"
             );
+    // staff name, roles
+    //ex. ceo carl brief description and maybe contact
+    // business goals/motto/mission
+
+
 }
 
 
@@ -82,5 +87,10 @@ public class PublicController {
                 "message", "Thanks " + name + ", we received your message and will respond shortly."
         );
     }
+
+
+    // may not need all these endpoint examples as some can be done purely through the frontend
+
+
 }
 
