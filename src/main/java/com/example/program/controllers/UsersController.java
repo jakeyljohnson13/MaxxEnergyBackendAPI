@@ -23,7 +23,10 @@ public class UsersController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserProfileResponse> me(Authentication auth) {
+    public ResponseEntity<?> me(Authentication auth) {
+        if (auth == null) return ResponseEntity.status(401).body("Auth is null");
+        else if (!auth.isAuthenticated()) return ResponseEntity.status(401).body("Unauthorized");
+
         var u = repo.findByUsername(auth.getName()).orElseThrow();
         return ResponseEntity.ok(new UserProfileResponse(
                 u.getUsername(),
@@ -35,15 +38,21 @@ public class UsersController {
     // DEV-ONLY: remove in prod
     @GetMapping("/me/hash")
     public ResponseEntity<?> myHash(Authentication auth) {
+        if (auth == null) return ResponseEntity.status(401).body("Auth is null");
+        else if (!auth.isAuthenticated()) return ResponseEntity.status(401).body("Unauthorized");
+
         var u = repo.findByUsername(auth.getName()).orElseThrow();
         return ResponseEntity.ok(java.util.Map.of("hash", u.getPassword()));
     }
 
     @PutMapping("/me")
-    public ResponseEntity<UserProfileResponse> updateMe(
+    public ResponseEntity<?> updateMe(
             Authentication auth,
             @RequestBody UpdateProfileRequest req
     ) {
+        if (auth == null) return ResponseEntity.status(401).body("Auth is null");
+        else if (!auth.isAuthenticated()) return ResponseEntity.status(401).body("Unauthorized");
+
         var u = repo.findByUsername(auth.getName()).orElseThrow();
         if (req.email() != null && !req.email().isBlank()) {
             u.setEmail(req.email());
