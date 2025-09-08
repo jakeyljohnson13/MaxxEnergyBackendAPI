@@ -59,7 +59,7 @@ public class AuthController {
             return ResponseEntity.status(401).body("Username not found");
         }
         if (!encoder.matches(req.password(), u.getPassword())) {
-            return ResponseEntity.status(401).body("Incorrect password.");
+            return ResponseEntity.status(401).body("Incorrect password");
         }
         var token = jwt.generate(u.getUsername(), u.getRole());
         return ResponseEntity.ok(new AuthResponse(token, u.getUsername(), u.getRole()));
