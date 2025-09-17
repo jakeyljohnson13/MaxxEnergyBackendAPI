@@ -2,8 +2,8 @@ package com.example.program.controllers;
 
 
 import com.example.program.data.GenerationPoint;
-import com.example.program.data.PlantGeneration;
-import com.example.program.data.PlantGenerationRepository;
+import com.example.program.model.PlantGeneration;
+import com.example.program.repository.PlantGenerationRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;

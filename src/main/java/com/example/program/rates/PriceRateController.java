@@ -3,7 +3,7 @@ package com.example.program.rates;
 
 import com.example.program.rates.PriceRate.DayType;
 import com.example.program.rates.PriceRate.Plan;
-import org.springframework.http.ResponseEntity;
+import com.example.program.repository.PriceRateRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;

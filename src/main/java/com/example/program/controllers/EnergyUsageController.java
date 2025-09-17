@@ -1,47 +1,69 @@
 package com.example.program.controllers;
 
-import com.example.program.model.EnergyUsageRecord;
+import com.example.program.data.UsagePoint;
+import com.example.program.repository.EnergyUsageRecordRepository.*;
 import com.example.program.service.EnergyUsageService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/energy-usage")
 public class EnergyUsageController {
 
-    private final EnergyUsageService service;
+    private final EnergyUsageService svc;
 
-    public EnergyUsageController(EnergyUsageService service) {
-        this.service = service;
+    public EnergyUsageController(EnergyUsageService svc) {
+        this.svc = svc;
     }
 
-    // GET all
-    @GetMapping
-    public List<EnergyUsageRecord> getAll() {
-        return service.findAll();
+    @GetMapping("/points")
+    public List<UsagePoint> points(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(required = false) String accountNo,
+            @RequestParam(required = false) String substation
+    ) {
+        return svc.usagePoints(accountNo, substation, from, to);
     }
 
-    // GET all (paged)
-    @GetMapping("/page")
-    public Page<EnergyUsageRecord> getAllPaged(
-            @PageableDefault(size = 50) Pageable pageable) {
-        return service.findAll(pageable);
+    @GetMapping("/daily")
+    public List<DailyUsageRow> daily(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(required = false) String accountNo,
+            @RequestParam(required = false) String substation
+    ) {
+        return svc.dailyUsage(accountNo, substation, from, to);
     }
 
-    // GET by id
-    @GetMapping("/{id}")
-    public ResponseEntity<EnergyUsageRecord> getById(@PathVariable Long id) {
-        return service.get(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    @GetMapping("/cumulative")
+    public List<CumulativeUsageRow> cumulative(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(required = false) String accountNo,
+            @RequestParam(required = false) String substation
+    ) {
+        return svc.cumulativeUsage(accountNo, substation, from, to);
     }
 
-    // POST create (simple passthrough)
-    @PostMapping
-    public ResponseEntity<EnergyUsageRecord> create(@RequestBody EnergyUsageRecord body) {
-        return ResponseEntity.ok(service.save(body));
+    @GetMapping("/summary")
+    public List<UsageSummaryRow> summary(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(required = false) String accountNo,
+            @RequestParam(required = false) String substation
+    ) {
+        return svc.usageSummaries(accountNo, substation, from, to);
     }
+
+    @GetMapping("/substation-load")
+    public List<SubstationLoadRow> substationLoad(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(required = false) String substation
+    ) {
+        return svc.substationLoad(substation, from, to);
+    }
+
 }

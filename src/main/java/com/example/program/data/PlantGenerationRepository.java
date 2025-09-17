@@ -1,7 +1,8 @@
-package com.example.program.data;
+package com.example.program.repository;
 
 
 
+import com.example.program.model.PlantGeneration;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

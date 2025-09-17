@@ -55,12 +55,9 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest req) {
         var u = repo.findByUsername(req.username()).orElse(null);
-        if (u == null) {
-            return ResponseEntity.status(401).body("Username not found");
-        }
-        if (!encoder.matches(req.password(), u.getPassword())) {
-            return ResponseEntity.status(401).body("Incorrect password");
-        }
+        if (u == null || !encoder.matches(req.password(), u.getPassword()))
+            return ResponseEntity.status(401).body("Invalid credentials");
+
         var token = jwt.generate(u.getUsername(), u.getRole());
         return ResponseEntity.ok(new AuthResponse(token, u.getUsername(), u.getRole()));
     }

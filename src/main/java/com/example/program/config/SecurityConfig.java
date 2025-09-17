@@ -99,6 +99,8 @@ public class SecurityConfig {
 
                         // Public reads (frontend already consumes these without a token)
                         .requestMatchers(HttpMethod.GET, "/api/public/**").permitAll()
+
+                        .requestMatchers("/api/generation/**").authenticated()
                         // If your “read” APIs are under /api/**, open GETs only:
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
 

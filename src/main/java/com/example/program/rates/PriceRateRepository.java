@@ -1,6 +1,7 @@
-package com.example.program.rates;
+package com.example.program.repository;
 
 
+import com.example.program.rates.PriceRate;
 import com.example.program.rates.PriceRate.DayType;
 import com.example.program.rates.PriceRate.Plan;
 import org.springframework.data.jpa.repository.JpaRepository;
